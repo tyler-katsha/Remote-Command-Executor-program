@@ -65,18 +65,6 @@ This project focuses on clean architecture, scalability, and real-world backend 
 
 - Java Dotenv (Environment Variables)
 
-#Project Structure
-
-RemoteCommandExecutor/
-├─ pom.xml
-├─ .env
-├─ src/
-│ └─ main/
-│ └─ java/
-│ └─ com/stages/remotecommandexecutor/
-│ └─ Server.java
-| └─ Client.java
-
 #How It Works
 
 1. The server listens for incoming TCP connections.
