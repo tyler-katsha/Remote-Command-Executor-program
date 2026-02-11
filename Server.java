@@ -124,7 +124,6 @@ public class Server {
 
     // try{
     //   String API_KEY = System.getenv("API_KEY");
-    //   System.out.println("API_KEY="+API_KEY);
     //   if(API_KEY == null){
     //     return "API KEY not configured";
     //   }
