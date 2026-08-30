@@ -1,30 +1,16 @@
 package RemoteCommandExecutor;
 
-
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Server {
   private static long startTime;   
-  public static void main(String[] args) {
+  static void main(String[] args) {
     startTime = System.currentTimeMillis(); 
     try(ServerSocket serSock = new ServerSocket(9999);){
       System.out.println("Listening for port 9999");
@@ -33,7 +19,7 @@ public class Server {
         Socket sock = serSock.accept();
 
         ClientHandler handler =new ClientHandler(sock);
-        handler.start();
+        handler.run();
 
         System.out.println("User connected: " + sock.getInetAddress());
         System.out.println("Users count: " + ClientHandler.getUsers());
@@ -119,99 +105,7 @@ public class Server {
   }
   private static String displayGeoLocation(){
 
-    //temp solution
     return "Cape Town, South Africa, Western Cape";
-
-    // try{
-    //   String API_KEY = System.getenv("API_KEY");
-    //   if(API_KEY == null){
-    //     return "API KEY not configured";
-    //   }
-    //   String urlString = "https://maps.googleapis.com/maps/api/geocode/json"+
-    //                      "?latlng=LATITUDE,LONGITUDE&key="+API_KEY;
-
-    //   URI uri = new URI(urlString);
-    //   URL url = uri.toURL();
-
-    //   HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    //   conn.setRequestMethod("GET");
-
-    //   BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-    //   String inputLine;
-      
-    //   StringBuilder response = new StringBuilder();
-
-      
-    //   while((inputLine = in.readLine()) != null){
-    //     response.append(inputLine);
-    //   }
-    //   in.close();
-  
-    //   return response.toString();    
-    // } catch(URISyntaxException e){
-    //   e.printStackTrace();
-    // }catch(MalformedURLException e){
-    //   e.printStackTrace();
-    // } catch(ProtocolException e){
-    //   e.printStackTrace();
-    // }catch(IOException e){
-    //   e.printStackTrace();
-    // } 
-    // return "Location not found";
   }
 }
-class ClientHandler extends Thread{
-  private Socket sock;
-  private static AtomicInteger users = new AtomicInteger(0);
-  public ClientHandler(Socket sock){
-    this.sock = sock;
-    users.incrementAndGet();
-  }
 
-  public static int getUsers(){
-    return users.get();
-  }
-  @Override
-  public void run(){
-    try{
-      InputStream in = sock.getInputStream();
-      OutputStream out = sock.getOutputStream();
-
-      byte[] buffer = new byte[2048];
-
-      while(true){
-        int n = in.read(buffer);
-        if(n == -1) break;
-
-        String str = new String(buffer,0,n,StandardCharsets.UTF_8).trim();
-        String response;
-        System.out.println("[" + sock.getInetAddress() +"] -> " + str);
-
-        if(str.equals("whoami")){
-          response = sock.getInetAddress().toString();
-        }else{
-          response = Server.display(str);
-        }
-         
-      
-        if("__DISCONNECT__".equals(response)){
-          break;
-        }
-        out.write((response + "\n").getBytes());
-        out.flush();
-      }
-      System.out.println("User disconnected...");
-      sock.close();
-      
-    } catch(IOException e){
-      e.printStackTrace();
-    }
-    finally{
-      users.decrementAndGet();
-      try{
-        sock.close();
-      } catch(Exception i){}
-    }
-    
-  }
-}
